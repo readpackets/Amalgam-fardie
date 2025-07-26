@@ -970,6 +970,7 @@ namespace Vars
 			CVar(CheatsBypass, "Cheats bypass", false);
 			CVar(EquipRegionUnlock, "Equip region unlock", false);
 			CVar(BackpackExpander, "Backpack expander", false);
+			CVar(NoPillRotation, "No pill rotation", false);
 			CVar(PingReducer, "Ping reducer", false);
 			CVar(PingTarget, "cl_cmdrate", 1, SLIDER_CLAMP, 1, 66);
 		SUBNAMESPACE_END(Exploits);

@@ -41,7 +41,22 @@ bool CProjectileSimulation::GetInfoMain(CTFPlayer* pPlayer, CTFWeaponBase* pWeap
 			float flOldCurrentTime = I::GlobalVars->curtime;
 			I::GlobalVars->curtime = TICKS_TO_TIME(pPlayer->m_nTickBase());
 
-			int iCmdNum = iFlags & ProjSimEnum::PredictCmdNum ? F::CritHack.PredictCmdNum(pPlayer, pWeapon, G::CurrentUserCmd) : G::CurrentUserCmd->command_number;
+			int iCmdNum;
+			
+			if (Vars::Misc::Exploits::NoPillRotation.Value && 
+				(pWeapon->GetWeaponID() == TF_WEAPON_GRENADELAUNCHER || 
+				 pWeapon->GetWeaponID() == TF_WEAPON_PIPEBOMBLAUNCHER || 
+				 pWeapon->GetWeaponID() == TF_WEAPON_CANNON))
+			{
+				iCmdNum = FindNoPillRotationCommandNumber(pPlayer, pWeapon, G::CurrentUserCmd);
+			}
+			else
+			{
+				iCmdNum = iFlags & ProjSimEnum::PredictCmdNum ? 
+					F::CritHack.PredictCmdNum(pPlayer, pWeapon, G::CurrentUserCmd) : 
+					G::CurrentUserCmd->command_number;
+			}
+			
 			SDK::RandomSeed(SDK::SeedFileLineHash(MD5_PseudoRandom(iCmdNum) & 0x7FFFFFFF, "SelectWeightedSequence", 0));
 			for (int i = 0; i < 6; ++i)
 				SDK::RandomFloat();
@@ -424,15 +439,8 @@ bool CProjectileSimulation::Initialize(ProjectileInfo& tProjInfo, bool bSimulate
 			case FNV1A::Hash32Const("models/weapons/w_models/w_stickybomb.mdl"):
 			case FNV1A::Hash32Const("models/weapons/w_models/w_stickybomb2.mdl"):
 			case FNV1A::Hash32Const("models/weapons/w_models/w_cannonball.mdl"):
-				if (!tProjInfo.m_bQuick && G::CurrentUserCmd)
-				{
-					vVelocity += vUp * 200.f + vUp * SDK::RandomFloat(-10.f, 10.f) + vRight * SDK::RandomFloat(-10.f, 10.f);
-					if (!tProjInfo.m_pWeapon || !SDK::AttribHookValue(0, "grenade_no_spin", tProjInfo.m_pWeapon))
-						vAngularVelocity = { 600.f, float(SDK::RandomInt(-1200, 1200)), 0.f };
-					break;
-				}
-				vVelocity += vUp * 200.f;
-				vAngularVelocity = { 600.f, -1200.f, 0.f };
+				if (!Vars::Misc::Exploits::NoPillRotation.Value)
+					vAngularVelocity = { 600.f, -1200.f, 0.f };
 				break;
 			case FNV1A::Hash32Const("models/workshop_partner/weapons/c_models/c_sd_cleaver/c_sd_cleaver.mdl"):
 				vVelocity = vForward * 10 + vUp;
@@ -635,4 +643,44 @@ void CProjectileSimulation::SetupTrace(CTraceFilterCollideable& filter, int& nMa
 	case ETFClassID::CTFProjectile_BallOfFire:
 		nMask |= CONTENTS_WATER;
 	}
+}
+
+int CProjectileSimulation::FindNoPillRotationCommandNumber(CTFPlayer* pPlayer, CTFWeaponBase* pWeapon, CUserCmd* pCmd)
+{
+    if (!pPlayer || !pWeapon || !pCmd)
+        return pCmd->command_number;
+    
+    if (pWeapon->GetWeaponID() != TF_WEAPON_GRENADELAUNCHER && 
+        pWeapon->GetWeaponID() != TF_WEAPON_PIPEBOMBLAUNCHER && 
+        pWeapon->GetWeaponID() != TF_WEAPON_CANNON)
+        return pCmd->command_number;
+    
+    int bestCmdNum = pCmd->command_number;
+    float bestRotationValue = FLT_MAX;
+    
+    for (int i = 0; i < 20; i++)
+    {
+        int testCmdNum = pCmd->command_number + i;
+        
+        SDK::RandomSeed(SDK::SeedFileLineHash(MD5_PseudoRandom(testCmdNum) & 0x7FFFFFFF, "SelectWeightedSequence", 0));
+        
+        for (int j = 0; j < 6; ++j)
+            SDK::RandomFloat();
+        
+        float test1 = SDK::RandomFloat(-1.0f, 1.0f);
+        float test2 = SDK::RandomFloat(-1.0f, 1.0f);
+        
+        float rotationValue = fabs(test1) + fabs(test2);
+        
+        if (rotationValue < bestRotationValue)
+        {
+            bestRotationValue = rotationValue;
+            bestCmdNum = testCmdNum;
+            
+            if (rotationValue < 0.1f)
+                break;
+        }
+    }
+    
+    return bestCmdNum;
 }
