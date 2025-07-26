@@ -541,6 +541,17 @@ void CMenu::MenuAimbot(int iTab)
 					FToggle(Vars::Visuals::Simulation::SwingLines, FToggleEnum::Right);
 					FSlider(Vars::Visuals::Simulation::DrawDuration);
 				} EndSection();
+
+				if (Section("Warp Prediction", 8))
+				{
+					FToggle(Vars::Visuals::WarpPrediction::Enabled);
+					FSlider(Vars::Visuals::WarpPrediction::DrawDuration);
+					
+					FColorPicker(Vars::Colors::WarpHitboxEdge, FColorPickerEnum::Left, {}, { H::Draw.Scale(10), H::Draw.Scale(40) });
+					FColorPicker(Vars::Colors::WarpHitboxEdgeIgnoreZ, FColorPickerEnum::Right, {}, { H::Draw.Scale(10), H::Draw.Scale(40) });
+					FColorPicker(Vars::Colors::WarpHitboxFace, FColorPickerEnum::Left, {}, { H::Draw.Scale(10), H::Draw.Scale(40) });
+					FColorPicker(Vars::Colors::WarpHitboxFaceIgnoreZ, FColorPickerEnum::Right, {}, { H::Draw.Scale(10), H::Draw.Scale(40) });
+				} EndSection();
 				if (Vars::Debug::Options.Value)
 				{
 					if (Section("##Debug Part1", -8))

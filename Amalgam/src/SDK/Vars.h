@@ -264,6 +264,10 @@ namespace Vars
 		CVar(BoundHitboxEdgeIgnoreZ, "Bound hitbox edge ignore Z color", Color_t(255, 255, 255, 0), VISUAL);
 		CVar(BoundHitboxFace, "Bound hitbox face color", Color_t(255, 255, 255, 0), VISUAL);
 		CVar(BoundHitboxFaceIgnoreZ, "Bound hitbox face ignore Z color", Color_t(255, 255, 255, 0), VISUAL);
+		CVar(WarpHitboxEdge, "Warp hitbox edge color", Color_t(150, 255, 150, 255), VISUAL);
+		CVar(WarpHitboxEdgeIgnoreZ, "Warp hitbox edge ignore Z color", Color_t(150, 255, 150, 0), VISUAL);
+		CVar(WarpHitboxFace, "Warp hitbox face color", Color_t(150, 255, 150, 0), VISUAL);
+		CVar(WarpHitboxFaceIgnoreZ, "Warp hitbox face ignore Z color", Color_t(150, 255, 150, 0), VISUAL);
 
 		CVar(SpellFootstep, "Spell footstep color", Color_t(255, 255, 255, 255), VISUAL);
 	NAMESPACE_END(Colors);
@@ -857,6 +861,11 @@ namespace Vars
 			CVar(SeparatorSpacing, "Separator spacing", 4, NOSAVE | DEBUGVAR, 1, 16);
 			CVar(SeparatorLength, "Separator length", 12.f, NOSAVE | DEBUGVAR, 2.f, 16.f);
 		SUBNAMESPACE_END(Simulation);
+
+		SUBNAMESPACE_BEGIN(WarpPrediction)
+			CVar(Enabled, VA_LIST("Enabled", "Warp prediction visualization"), false, VISUAL);
+			CVar(DrawDuration, VA_LIST("Draw duration", "Warp prediction draw duration"), 5.f, VISUAL | SLIDER_MIN | SLIDER_PRECISION, 0.f, 10.f);
+		SUBNAMESPACE_END(WarpPrediction);
 
 		SUBNAMESPACE_BEGIN(Trajectory)
 			CVar(Override, "Simulation override", false, NOSAVE | DEBUGVAR);

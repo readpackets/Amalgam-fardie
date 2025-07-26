@@ -170,12 +170,36 @@ bool CWarpPrediction::IsWarping(int iIndex)
 
 void CWarpPrediction::Draw()
 { 
-    // Draw predicted positions for debugging
+    if (!Vars::Visuals::WarpPrediction::Enabled.Value)
+        return;
+        
     for (const auto& [index, position] : m_mPredictedPositions)
     {
         if (m_mIsWarping[index])
         {
-            // draw here for visualizatiaon
+            auto pEntity = I::ClientEntityList->GetClientEntity(index);
+            if (!pEntity || !pEntity->IsPlayer())
+                continue;
+                
+            auto pPlayer = pEntity->As<CTFPlayer>();
+            if (!pPlayer || !pPlayer->IsAlive())
+                continue;
+                
+            Vec3 vMins = pPlayer->m_vecMins();
+            Vec3 vMaxs = pPlayer->m_vecMaxs();
+            
+            if (Vars::Colors::WarpHitboxEdgeIgnoreZ.Value.a || Vars::Colors::WarpHitboxFaceIgnoreZ.Value.a)
+                G::BoxStorage.emplace_back(position, vMins, vMaxs, Vec3(), 
+                                         I::GlobalVars->curtime + Vars::Visuals::WarpPrediction::DrawDuration.Value, 
+                                         Vars::Colors::WarpHitboxEdgeIgnoreZ.Value, 
+                                         Vars::Colors::WarpHitboxFaceIgnoreZ.Value);
+                                         
+            if (Vars::Colors::WarpHitboxEdge.Value.a || Vars::Colors::WarpHitboxFace.Value.a)
+                G::BoxStorage.emplace_back(position, vMins, vMaxs, Vec3(), 
+                                         I::GlobalVars->curtime + Vars::Visuals::WarpPrediction::DrawDuration.Value, 
+                                         Vars::Colors::WarpHitboxEdge.Value, 
+                                         Vars::Colors::WarpHitboxFace.Value, 
+                                         true);
         }
     }
 }
